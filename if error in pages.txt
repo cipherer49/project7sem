@@ -1,0 +1,9 @@
+##pages
+    # page1
+        self.ui.t_analysis_btn.clicked.connect(self.ui.pages.setCurrentWidget(self.ui.page1))
+    #page2
+        self.ui.extra_btn_1.clicked.connect(self.ui.pages.setCurrentWidget(self.ui.page2))
+        self.ui.extra_btn_2.clicked.connect(self.ui.pages.setCurrentWidget(self.ui.page3))
+
+self.lstart_login_btn.clicked.connect(self.show_start_window)
+self.login_button1.clicked.connect(self.show_config_window)

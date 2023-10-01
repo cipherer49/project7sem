@@ -1,0 +1,23 @@
+    def backbutton(self):
+        from mainscreen import Ui_MainWindow #for avoiding circular imports
+
+        self.window2 = QtWidgets.QMainWindow()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self.window2)
+        self.window2.show()
+
+
+# calling back button
+        self.back_button1.clicked.connect(self.backbutton)
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    Login_window1 = QtWidgets.QMainWindow()
+    ui = Ui_Login_window1()
+
+    ui.setupUi(Login_window1)
+
+    
+    Login_window1.show()
+    sys.exit(app.exec_())

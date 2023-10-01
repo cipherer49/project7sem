@@ -1,0 +1,9 @@
+reference links:
+1.Pyqt designer
+https://www.youtube.com/watch?v=FVpho_UiDAY
+
+2.opening other window when button is clicked:
+https://www.youtube.com/watch?v=dRRpbDFnMHI
+
+3.making login:
+https://www.youtube.com/watch?v=RL9nGmv3uSU&pp=ygUebWFraW5nIGxvZ2luIHNjcmVlbiB1c2luZyBweXF0

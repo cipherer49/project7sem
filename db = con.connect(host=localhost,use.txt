@@ -1,0 +1,30 @@
+db = con.connect(host="localhost",user="root",password="",db="login_database")
+        cursor = db.cursor()
+        cursor.execute("select * from login_table where username='"+ user +"' and password = '"+ pwd +"'")
+        result = cursor.fetchone()
+
+
+
+
+    def loginfunction(self):
+        # username_input
+        # password_input
+        print("Login button clicked!")
+        user = self.username_input.text()
+        pwd = self.password_input.text()
+        #print("Succesfully logged in with username ", username," and password ",password)
+        db = con.connect(host="127.0.0.1", user="root", password="MyNewPass", db="login_database")
+        cursor = db.cursor()
+        query = "SELECT * FROM login_table WHERE username=%s AND password=%s"
+        cursor.execute(query, (user, pwd))
+        result = cursor.fetchone()
+
+        print("Query result:", result)
+        if result:
+
+            print("hi")
+        else:
+
+            print("bye")
+
+
