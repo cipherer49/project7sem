@@ -7,6 +7,7 @@ from tkinter import messagebox
 from PyQt5.uic import loadUi
 import sys
 
+
 #for implementing new screen from config_login button we create a class
 class Config_scr(QtWidgets.QMainWindow):
     def __init__(self,):
@@ -20,6 +21,15 @@ class Config_scr(QtWidgets.QMainWindow):
         self.loadIP()
         self.add_btn.clicked.connect(self.add_ip)
         self.rem_btn.clicked.connect(self.remove_ip)
+        self.add_btn.clicked.connect(self.store_Dns_Data)# to call function to store dns to sql
+        self.loadAndPopulateData()# to showing the sql stored data into pyqt table
+        self.rem_btn.clicked.connect(self.deleteRowByID)
+        self.dns_filter_apply_btn.clicked.connect(self.dns_apply_Message)
+        self.dns_filter_rem_btn.clicked.connect(self.dns_remove_Message)
+        self.dns_filter_rem_btn.clicked.connect(self.getRowCount)
+        self.dns_filter_apply_btn.clicked.connect(self.getRowCount2)
+
+
 
     def add_ip(self):
         ID = self.id_input.text()
@@ -54,9 +64,7 @@ class Config_scr(QtWidgets.QMainWindow):
 
     def loadIP(self):
         # creating list variable for easy insertion
-        dns = [
-
-        ]
+        dns = []
         self.iptable.setRowCount(len(dns))
         self.iptable.setColumnCount(2)
         self.iptable.setHorizontalHeaderLabels(('ID','DNS'))
@@ -71,13 +79,155 @@ class Config_scr(QtWidgets.QMainWindow):
             self.iptable.setItem(row_index,1,QTableWidgetItem(str(ip['IP'])))
             row_index +=1
 
-    
+    def store_Dns_Data(self):
+        # Connect to an SQLite database
+        conn = sqlite3.connect('dns_database.db')
+        cursor = conn.cursor()
+
+        # Create a table (if it doesn't exist) to store the data
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS ip_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                column1 INTEGER,
+                column2 TEXT
+            )
+        ''')
+
+        # Iterate through the table and insert data into the database
+        for row_index in range(self.iptable.rowCount()):
+            column1 = self.iptable.item(row_index, 0).text()
+            column2 = self.iptable.item(row_index, 1).text()
+
+            # Insert data into the database
+            cursor.execute('INSERT INTO ip_data (column1, column2) VALUES (?, ?)', (column1, column2))
+
+        # Commit the changes and close the connection
+        conn.commit()
+        # Fetch and print the inserted data
+        cursor.execute('SELECT * FROM ip_data')
+        inserted_data = cursor.fetchall()
+
+        for row in inserted_data:
+            print(f'ID: {row[0]}, Column1: {row[1]}, Column2: {row[2]}')
+
+        # Close the connection
+        conn.close()
+
+        print('Data stored in SQL database.')
+
+    def deleteRowByID(self):
+        id_to_delete = self.rem_ip.text()
+
+        if id_to_delete:
+            # Connect to the SQLite database
+            conn = sqlite3.connect('dns_database.db')
+            cursor = conn.cursor()
+
+            # Delete the row with the specified ID
+            cursor.execute('DELETE FROM ip_data WHERE column1 = ?', (id_to_delete,))
+
+            # Commit the changes
+            conn.commit()
+            conn.close()
+
+            # Refresh the table to reflect the changes
+            self.loadAndPopulateData()
+            print(f'Removed rows with ID {id_to_delete} from SQL database.')
+
+    def loadAndPopulateData(self):
+        # Connect to the SQLite database
+        conn = sqlite3.connect('dns_database.db')
+        cursor = conn.cursor()
+
+        # Execute a SELECT query to retrieve data from the database
+        cursor.execute('SELECT * FROM ip_data')
+
+        # Fetch all the rows from the query result
+        rows = cursor.fetchall()
+
+        # Populate the table with retrieved data
+        self.iptable.setRowCount(len(rows))
+        for row_index, row in enumerate(rows):
+            id_item = QTableWidgetItem(str(row[1]))  # Assuming ID is in the second column
+            ip_item = QTableWidgetItem(row[2])  # Assuming IP is in the third column
+
+            self.iptable.setItem(row_index, 0, id_item)
+            self.iptable.setItem(row_index, 1, ip_item)
+
+        # Close the database connection
+        conn.close()
+
+
+
+    def getRowCount(self):
+        try:
+            # Connect to the SQLite database
+            conn = sqlite3.connect('dns_database.db')
+            cursor = conn.cursor()
+
+            # Execute a SQL query to count the rows in the 'ip_data' table
+            cursor.execute('SELECT COUNT(*) FROM ip_data')
+            row_count = cursor.fetchone()[0]
+
+
+
+            self.dns_remove_Message(row_count)
+
+
+            #self.dns_display_label.setText(f'Total Rows: {row_count}')
+            # Close the database connection
+            conn.close()
+
+
+        except Exception as e:
+            print(f"Error: {str(e)}")
+
+    def getRowCount2(self):
+        try:
+            # Connect to the SQLite database
+            conn = sqlite3.connect('dns_database.db')
+            cursor = conn.cursor()
+
+            # Execute a SQL query to count the rows in the 'ip_data' table
+            cursor.execute('SELECT COUNT(*) FROM ip_data')
+            row_count = cursor.fetchone()[0]
+
+
+
+            self.dns_apply_Message(row_count)
+
+
+            #self.dns_display_label.setText(f'Total Rows: {row_count}')
+            # Close the database connection
+            conn.close()
+
+
+        except Exception as e:
+            print(f"Error: {str(e)}")
+
+    def dns_apply_Message(self,row_count):#showing message of applied or not
+        message_style = """
+                            color: blue;
+                        """
+        self.dns_display_label.setStyleSheet(message_style)
+        # Display a message in the QLabel
+        self.dns_display_label.setText(f"Action applied for dns [{row_count}].\n This message remains visible.")
+
+    def dns_remove_Message(self,row_count):
+        message_style = """
+                    color: red;
+                """
+        self.dns_display_label.setStyleSheet(message_style)
+        self.dns_display_label.setText(f"Action Removed from dns [{row_count}]\nThis message remains visible")
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = Config_scr()
     window.show()
     sys.exit(app.exec_())
+
 
 
 
