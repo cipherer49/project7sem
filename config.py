@@ -1,3 +1,4 @@
+import socket
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sqlite3
 from PyQt5.QtWidgets import QDialog, QApplication,QMessageBox,QTableWidgetItem
@@ -6,6 +7,9 @@ from tkinter import *
 from tkinter import messagebox
 from PyQt5.uic import loadUi
 import sys
+sys.path.append('D:/panapticon/scanner/dns_conversion.py')
+from scanner.dns_conversion import fetch_dns_data_from_database, dns_to_ip
+
 
 
 #for implementing new screen from config_login button we create a class
@@ -28,6 +32,8 @@ class Config_scr(QtWidgets.QMainWindow):
         self.dns_filter_rem_btn.clicked.connect(self.dns_remove_Message)
         self.dns_filter_rem_btn.clicked.connect(self.getRowCount)
         self.dns_filter_apply_btn.clicked.connect(self.getRowCount2)
+        self.dns_filter_apply_btn.clicked.connect(self.dns_to_ip_show)# for fetching from dns and converting to ip then showing it
+
 
 
 
@@ -220,6 +226,16 @@ class Config_scr(QtWidgets.QMainWindow):
         self.dns_display_label.setStyleSheet(message_style)
         self.dns_display_label.setText(f"Action Removed from dns [{row_count}]\nThis message remains visible")
 
+    def dns_to_ip_show(self):
+        dns_data = fetch_dns_data_from_database()  # Fetch DNS data from the database
+
+        for dns_name_tuple in dns_data:
+            column1, dns_name = dns_name_tuple  # Unpack the tuple into column1 and dns_name
+            try:
+                ip_address = socket.gethostbyname(dns_name)
+                print(f"Id: {column1}, DNS Name: {dns_name}, IP Address: {ip_address}")
+            except socket.gaierror as e:
+                print(f"Id: {column1}, DNS Name: {dns_name}, Error: {e}")
 
 
 if __name__ == '__main__':
